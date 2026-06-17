@@ -1,24 +1,20 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from services.pdf_extractor import extract_resume_from_path
+import io
+from fastapi import APIRouter, HTTPException, File, UploadFile
+from services.pdf_extractor import extract_resume_from_stream
 
 router = APIRouter(prefix="/extract-resume", tags=["extraction"])
 
 
-class ExtractRequest(BaseModel):
-    file_path: str
-
-
 @router.post("")
-def extract_resume(request: ExtractRequest):
+async def extract_resume(file: UploadFile = File(...)):
     """
-    Receives the absolute path of an uploaded PDF (written by NestJS),
-    extracts and structures its text, and returns it to NestJS.
+    Receives an uploaded PDF file stream, extracts and structures its text,
+    and returns it to NestJS.
     """
     try:
-        result = extract_resume_from_path(request.file_path)
+        content = await file.read()
+        pdf_stream = io.BytesIO(content)
+        result = extract_resume_from_stream(pdf_stream)
         return result
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="File not found at provided path.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")

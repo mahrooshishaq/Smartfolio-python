@@ -14,9 +14,9 @@ SECTION_KEYWORDS = {
 }
 
 
-def extract_resume_from_path(file_path: str) -> dict:
+def extract_resume_from_stream(stream) -> dict:
     """
-    Opens a PDF with pdfplumber, extracts text page by page,
+    Opens a PDF with pdfplumber from a stream, extracts text page by page,
     detects basic metadata, and identifies resume sections.
     """
     text_pages = []
@@ -24,7 +24,7 @@ def extract_resume_from_path(file_path: str) -> dict:
     has_images = False
     page_count = 0
 
-    with pdfplumber.open(file_path) as pdf:
+    with pdfplumber.open(stream) as pdf:
         page_count = len(pdf.pages)
 
         for page in pdf.pages:
